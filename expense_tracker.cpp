@@ -20,13 +20,15 @@ public:
         cin >> category;
         cout << " Amount: ";
         cin >> amount;
+        cout << " Note: ";
+        cin>> note;
         cin.ignore();
         cin.getline(note, 50);
         cout << "\n Expense Added Successfully!";
     }
 
     void display() const {
-        cout << left << setw(12) << date << setw(15) << category << setw(10) << fixed << setprecision(2) << amount << endl;
+        cout << left << setw(12) << date << setw(15) << category << setw(10) << fixed << setprecision(2) << amount << setw(50) << note << endl;
     }
 };
 
@@ -67,7 +69,7 @@ public:
             return;
         }
         cout << "\n--- EXPENSE RECORDS ---\n";
-        cout << left << setw(12) << "DATE" << setw(15) << "CATEGORY" << setw(10) << "AMOUNT" << endl;
+        cout << left << setw(12) << "DATE" << setw(15) << "CATEGORY" << setw(10) << "AMOUNT" << setw(50) << "NOTE" << endl;
         while (inFile.read(reinterpret_cast<char*>(&e), sizeof(Expense))) {
             e.display();
         }
@@ -110,7 +112,7 @@ int main() {
     int choice;
     while (true) {
         cout << "\n================================" << endl;
-        cout << "    EXPENSE TRACKER MENU" << endl;
+        cout << "    --EXPENSE TRACKER MENU--   " << endl;
         cout << "================================" << endl;
         cout << "1. Add Expense\n2. View All\n3. Search Category\n4. Monthly Report\n5. Exit\n";
         cout << "Choice: ";
