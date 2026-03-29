@@ -1,8 +1,10 @@
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <iomanip>
 #include <vector>
+#include <cstring>   // ✅ FIXED
 
 using namespace std;
 
@@ -13,19 +15,22 @@ public:
     float amount;
     char note[50];
 
-    void input() {
-        cout << "\n Date (dd-mm-yyyy): ";
-        cin >> date;
-        cout << " Category: ";
-        cin >> category;
-        cout << " Amount: ";
-        cin >> amount;
-        cout << " Note: ";
-        cin>> note;
-        cin.ignore();
-        cin.getline(note, 50);
-        cout << "\n Expense Added Successfully!";
-    }
+   void input() {
+    cout << "\n Date (dd-mm-yyyy): ";
+    cin >> date;
+
+    cout << " Category: ";
+    cin >> category;
+
+    cout << " Amount: ";
+    cin >> amount;
+
+    cout << " Note: ";
+    cin.ignore();  // clear buffer
+    cin.getline(note, 50);
+
+    cout << "\n Expense Added Successfully!";
+}
 
     void display() const {
         cout << left << setw(12) << date << setw(15) << category << setw(10) << fixed << setprecision(2) << amount << setw(50) << note << endl;
@@ -61,48 +66,71 @@ public:
         outFile.close();
     }
 
-    void viewExpenses() {
-        Expense e;
-        ifstream inFile(fileName, ios::binary);
-        if (!inFile) {
-            cout << "\nNo data found!";
-            return;
-        }
-        cout << "\n--- EXPENSE RECORDS ---\n";
-        cout << left << setw(12) << "DATE" << setw(15) << "CATEGORY" << setw(10) << "AMOUNT" << setw(50) << "NOTE" << endl;
-        while (inFile.read(reinterpret_cast<char*>(&e), sizeof(Expense))) {
+  void viewExpenses() {
+    Expense e;
+    ifstream inFile(fileName, ios::binary);
+
+    if (!inFile) {
+        cout << "\nNo data found!";
+        return;
+    }
+
+    cout << "\n--- EXPENSE RECORDS ---\n";
+    cout << left << setw(12) << "DATE" << setw(15) << "CATEGORY"
+         << setw(10) << "AMOUNT" << setw(50) << "NOTE" << endl;
+
+    while (inFile.read(reinterpret_cast<char*>(&e), sizeof(Expense))) {
+        e.display();
+    }
+
+    inFile.close();
+}
+
+void searchByCategory(string key) {
+    Expense e;
+    bool found = false;
+    ifstream inFile(fileName, ios::binary);
+
+    if (!inFile) {
+        cout << "\nFile not found!";
+        return;
+    }
+
+    cout << "\n--- SEARCH RESULTS ---\n";
+    cout << left << setw(12) << "DATE" << setw(15) << "CATEGORY" 
+         << setw(10) << "AMOUNT" << setw(50) << "NOTE" << endl;
+
+    while (inFile.read(reinterpret_cast<char*>(&e), sizeof(Expense))) {
+        if (string(e.category) == key) {   // ✅ FIXED
             e.display();
+            found = true;
         }
-        inFile.close();
     }
 
-    void searchByCategory(string key) {
-        Expense e;
-        bool found = false;
-        ifstream inFile(fileName, ios::binary);
-        while (inFile.read(reinterpret_cast<char*>(&e), sizeof(Expense))) {
-            if (string(e.category) == key) {
-                e.display();
-                found = true;
-            }
-        }
-        if (!found) cout << "\n No expenses found in this category.";
-        inFile.close();
-    }
+    if (!found) cout << "\nNo expenses found in this category.";
+    inFile.close();
+}
 
-    void monthlyReport(string month) {
-        Expense e;
-        float total = 0;
-        ifstream inFile(fileName, ios::binary);
-        while (inFile.read(reinterpret_cast<char*>(&e), sizeof(Expense))) {
-            string d(e.date);
-            if (d.substr(3, 2) == month) {
+void monthlyReport(string month) {
+    Expense e;
+    float total = 0;
+    ifstream inFile(fileName, ios::binary);
+
+    while (inFile.read(reinterpret_cast<char*>(&e), sizeof(Expense))) {
+        string d(e.date);
+
+        if (d.length() >= 5) {   // safety check
+            string fileMonth = d.substr(3, 2);
+
+            if (fileMonth == month) {
                 total += e.amount;
             }
         }
-        cout << "\n Total for month " << month << ": " << total << endl;
-        inFile.close();
     }
+
+    cout << "\n Total for month " << month << ": " << total << endl;
+    inFile.close();
+}
 };
 
 int main() {
